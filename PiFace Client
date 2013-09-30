@@ -53,7 +53,8 @@ listener.register(2, pifacecommon.interrupts.IODIR_ON, stop_listening)
 # Start listening for events.  This spawns a new thread.
 listener.activate()
 
-# Hang around until someone presses button 3.
+# Hang around until someone presses button 2
+.
 while not send:
     time.sleep(1)
 
