@@ -1,0 +1,60 @@
+#!/usr/bin/python
+#reference sites used 
+# http://blog.oddbit.com/post/interrupts-on-the-piface   basically our entire program
+# http://piface.github.io/pifacedigitalio/example.html  the actual documentation for PiFace
+
+import piface.pfio
+import pifacecommon.core
+import pifacecommon.interrupts
+import pifacedigitalio
+import os
+import time
+
+current_led = 0 #this is the current led
+send = False #still playing the game
+
+#on button press 3 quit (we will change this to just stop send the shit and disable 
+#buttons until the next round
+def stop_listening(event):
+    global send
+    send = True
+
+pifacecommon.core.init()
+
+#set the status of the current led on button press
+def set_led(event):
+    
+    #make led object of the current led, using a line of code from this
+    #http://piface.github.io/pifacedigitalio/example.html   
+    led = pifacedigitalio.LED(current_led) 
+    
+    if (led.value == 1):
+        led.value = 0
+    else:
+        led.value = 1
+        
+#change to the next LED on button press  
+def next_led(event): 
+    if (current_led == 3):
+        current_led = 0
+    else:
+        current_led += 1
+   
+# GPIOB is the input ports, including the three buttons.
+port = pifacecommon.core.GPIOB
+
+listener = pifacecommon.interrupts.PortEventListener(port)
+
+# set up listeners for all buttons
+listener.register(0, pifacecommon.interrupts.IODIR_ON, set_led)
+listener.register(1, pifacecommon.interrupts.IODIR_ON, next_led)
+listener.register(2, pifacecommon.interrupts.IODIR_ON, stop_listening)
+
+# Start listening for events.  This spawns a new thread.
+listener.activate()
+
+# Hang around until someone presses button 3.
+while not send:
+    time.sleep(1)
+
+listener.deactivate()
