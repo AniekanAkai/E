@@ -1,4 +1,13 @@
 # Python GB client
+# Wiring scheme:
+# GP25 in J2 to B1 in J3
+# GP24 in J2 to B2 in J3
+# GP23 in J2 to B3 in J3
+# GP10 in J2 to B5 in J3
+# GP9 in J2 to B6 in J3
+# GP8 in J2 to B7 in J3
+# GP7 in J2 to B8 in J3
+# jumpers on U4-out-B5 ... U4-out-B8
 
 import RPi.GPIO as GPIO
 
