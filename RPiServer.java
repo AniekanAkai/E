@@ -22,6 +22,7 @@ public class RPiServer {
 		clientThread = new ClientThread(clientSocket);
 		clientThread.start();
 		
+		
 	    } catch (IOException e) {
 	   }
 	}
