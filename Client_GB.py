@@ -8,6 +8,7 @@
 # GP8 in J2 to B7 in J3
 # GP7 in J2 to B8 in J3
 # jumpers on U4-out-B5 ... U4-out-B8
+# jumpers on U3-in-B1 ... U3-in-B3
 
 import RPi.GPIO as GPIO
 
