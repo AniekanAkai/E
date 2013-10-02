@@ -1,17 +1,23 @@
 import java.net.*;
 import java.io.*;
 
-
+/**
+* ClientThread.java
+* Threads to manage each user(client) that connects to the server.
+* This thread communicates directly with the users(GertBoard and PiFace)
+*/
 public class ClientThread extends Thread{
-
+	char [] bits = new char[4]; //Bits are transmitted as an array of characters
 	RPiServer server;
-    private Socket clientSocket = null;
+    public Socket clientSocket = null;
 	String configuration;
+	private String myIP;
 	
-    ClientThread(Socket socket, RPiServer server){
+    ClientThread(Socket socket, RPiServer server, String socketIP){
 		super("ClientThread");
 		this.clientSocket =  socket;
 		this.server = server;
+		myIP = socketIP;
 	}
 
     
@@ -21,14 +27,19 @@ public class ClientThread extends Thread{
 			  PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 			  BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-			  while ((configuration = in.readLine()) != null) {
-				server.assignConfig(configuration);
+		while(in.read(bits) == 0){
+			System.out.println(".");			
+		}
+
+		configuration = new String(bits);
+
+		  if (configuration != null) {
+				server.assignConfig(myIP, configuration);
 				System.out.println(configuration);
 				
-			 }
-			  out.close();
-			  in.close();
-			  clientSocket.close();
+		 } else {
+        			System.out.println("bad bad bad");
+		 }
 		}catch(IOException e){
 			e.printStackTrace();
 			System.exit(1);
