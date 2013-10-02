@@ -1,3 +1,53 @@
+import sys
+import socket
+import pifacecommon.core
+import pifacecommon.interrupts
+import pifacedigitalio
+import os
+import time
+
+#create socket 
+r = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+r.connect(('10.0.0.1', 4444))
+current_led = 0
+pfd=pifacedigitalio.PiFaceDigital()
+
+#this function toggles the state of the currently selected LED
+def toggle(event):
+        global current_led
+        pfd.leds[current_led].toggle()
+
+#this function will cycle the currently selected LED to the next one
+#loops back to the first LED if it reaches the 4th
+def next(event):
+        global current_led
+        if current_led < 3:
+                current_led += 1
+        else:
+                current_led = 0
+
+#sends the current LED configuration to the server
+def send(event):
+        global config,r
+#       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#       s.connect(('10.0.0.1',4444))
+        config = [pfd.leds[0].value,pfd.leds[1].value,pfd.leds[2].value, pfd.leds[3].value]
+        led_status = ''.join(map(str,config))
+        r.send(led_status)
+
+#flashes the LEDs and exits the program
+def flash():
+        pfd.output_port.all_on()
+        time.sleep(0.5)
+        pfd.output_port.all_off()
+        time.sleep(0.5)
+        pfd.output_port.all_on()
+        time.sleep(0.5)
+        pfd.output_port.all_off()
+        r.close()
+        listener.deactivate()
+        sys.exit(1)
+
 #initiate the modules used, .core might not be used I dont remember
 pifacecommon.core.init()
 pifacedigitalio.init()
