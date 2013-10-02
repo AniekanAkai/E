@@ -145,7 +145,7 @@ public class RPiServer {
 		try {
 			s.close();
 		} catch (IOException e) {
-			//coulkd not close socket. oh well.
+			//could not close socket. oh well.
 			e.printStackTrace();
 		}
 	
