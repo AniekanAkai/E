@@ -1,61 +1,29 @@
-#!/usr/bin/python
-#reference sites used 
-# http://blog.oddbit.com/post/interrupts-on-the-piface   basically our entire program
-# http://piface.github.io/pifacedigitalio/example.html  the actual documentation for PiFace
-
-import piface.pfio
-import pifacecommon.core
-import pifacecommon.interrupts
-import pifacedigitalio
-import os
-import time
-
-current_led = 0 #this is the current led
-send = False #still playing the game
-
-#on button press 3 quit (we will change this to just stop send the shit and disable 
-#buttons until the next round
-def stop_listening(event):
-    global send
-    send = True
-
+  GNU nano 2.2.6             File: testpiface.py                                
+#initiate the modules used, .core might not be used I dont remember
 pifacecommon.core.init()
+pifacedigitalio.init()
+#create the event listener(for the interrupts)
+listener = pifacedigitalio.InputEventListener()
 
-#set the status of the current led on button press
-def set_led(event):
-    
-    #make led object of the current led, using a line of code from this
-    #http://piface.github.io/pifacedigitalio/example.html   
-    led = pifacedigitalio.LED(current_led) 
-    
-    if (led.value == 1):
-        led.value = 0
-    else:
-        led.value = 1
-        
-#change to the next LED on button press  
-def next_led(event): 
-    if (current_led == 3):
-        current_led = 0
-    else:
-        current_led += 1
-   
-# GPIOB is the input ports, including the three buttons.
-port = pifacecommon.core.GPIOB
+#add the listener to the buttons and assign the appropriate callbacks
+#to the appropriate buttons 
+#button 0 toggles LED status
+#button 1 goes to next LED
+#button 2 sends current configuration of LEDs
+listener.register(0, pifacecommon.interrupts.IODIR_ON, toggle)
+listener.register(1, pifacecommon.interrupts.IODIR_ON, next)
+listener.register(2, pifacecommon.interrupts.IODIR_ON, send)
 
-listener = pifacecommon.interrupts.PortEventListener(port)
-
-# set up listeners for all buttons
-listener.register(0, pifacecommon.interrupts.IODIR_ON, set_led)
-listener.register(1, pifacecommon.interrupts.IODIR_ON, next_led)
-listener.register(2, pifacecommon.interrupts.IODIR_ON, stop_listening)
-
-# Start listening for events.  This spawns a new thread.
+#start listening for interrupts
 listener.activate()
 
-# Hang around until someone presses button 2
-.
-while not send:
-    time.sleep(1)
+#infinite loop so program doesnt end
+#constantly listens for server to inform if sent config is correct
+#if it recieves the 'win' string from the server it calls flash which
+#terminates the program
+while True:
+        time.sleep(1)
+        if r.recv(1024)=='win':
+                flash()
 
-listener.deactivate()
+
