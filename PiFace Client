@@ -1,4 +1,3 @@
-  GNU nano 2.2.6             File: testpiface.py                                
 #initiate the modules used, .core might not be used I dont remember
 pifacecommon.core.init()
 pifacedigitalio.init()
