@@ -9,7 +9,7 @@ public class RPiServer {
 	ArrayList<Socket> clientSocketList;
 	Socket clientSocket = null;
 	ServerSocket serverSocket = null;
-	String[][] user = new String[2][2];
+	volatile String[][] user = new String[2][2];
 	/**
 	 * Gamer 1 Gamer 2 IP Addr gamer(0,0) gamer(0,1) Config gamer(1,0)
 	 * gamer(1,1)
@@ -50,7 +50,8 @@ public class RPiServer {
 			try {
 				System.out.println("Waiting for client...");
 				clientSocket = serverSocket.accept();
-				clientThread = new ClientThread(clientSocket, this);
+				String socketIP = clientSocket.getInetAddress().getHostAddress();
+				clientThread = new ClientThread(clientSocket, this, socketIP);
 
 				System.out.println("New Gamer connected.\n ID: "+ clientThread.getId()+" ; IP: "+ clientSocket.getInetAddress()+"\n");
 				if(numUsers>=2){
@@ -65,18 +66,21 @@ public class RPiServer {
 					clientSocketList.add(clientSocket);
 					user[0][1] = clientSocket.getInetAddress().toString(); // Gamer 2 IP address
 					user[1][1] = "3333";//Default config for gamer 2
+					++numUsers;
 				}
 				
 				
 				clientThread.start();			
 				
-				if(numUsers == 1){
-					while(user[1][0]=="2222" || user[1][1]== "3333"){}
+				if(numUsers == 2){
+
+					while(user[1][0] =="2222" && user[1][1] == "3333"){}
 					System.out.println(checkMatch());
 					for (Socket s : clientSocketList){
 						OutputStream outToClient = s.getOutputStream();
 						if(checkMatch()){
 							outToClient.write("win".getBytes());
+							break;
 						} else{
 							outToClient.write("fail".getBytes());
 						}
