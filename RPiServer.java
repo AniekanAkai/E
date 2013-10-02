@@ -99,13 +99,15 @@ public class RPiServer {
 					
 				
 				if(numUsers == 2){
-
+						
 					if(loops >= 2){
-					for (ClientThread s : threads){
-					s.run();
+						//This allows the server to listen for more inputs after the first set of input in the case 
+						//of no match. It listens until a match is made. 
+						for (ClientThread s : threads){
+							s.run();
+						}
 					}
-					}
-					while(user[1][0] =="2222" || user[1][1] == "3333"){}
+					while(user[1][0] =="2222" || user[1][1] == "3333"){}//Does nothing until both users have changed their bit config
 					System.out.println(checkMatch());
 					for (Socket s : clientSocketList){
 						if(s.isClosed()){
@@ -126,6 +128,7 @@ public class RPiServer {
 				}
 
 				if(gameover){
+					//There is a match
 					break;				
 				}
 	
