@@ -80,6 +80,7 @@ public class RPiServer {
 						OutputStream outToClient = s.getOutputStream();
 						if(checkMatch()){
 							outToClient.write("win".getBytes());
+							cleanup();
 							break;
 						} else{
 							outToClient.write("fail".getBytes());
@@ -92,6 +93,17 @@ public class RPiServer {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private void cleanup() {
+		for(Socket s: clientSocketList){
+			try {
+				s.close();
+			} catch (IOException e) {
+				//coulkd not close socket. oh well.
+			}
+		}
+		
 	}
 
 	public static void main(String[] args) throws IOException {
