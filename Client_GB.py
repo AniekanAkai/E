@@ -68,14 +68,12 @@ def snd_callback(but_snd): #sends led status to server
         s.close()
 
 def flash(): #blinks end leds 10 times on correct guess
-        for i in (0,20):
+        for i in range(0,20):
                 sleep(0.25)
                 for num in ledflash:
                         GPIO.output(num, not GPIO.input(num))
         for num in ledflash:
                 GPIO.output(num, 1)
-        else:
-                led_curr -= 1
 
 #detect button presses
 GPIO.add_event_detect(but_tog, GPIO.FALLING, callback=tog_callback, bouncetime=200)
