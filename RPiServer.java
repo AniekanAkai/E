@@ -2,28 +2,40 @@ import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
 
-
+/**
+* RPiServer.java
+* This is the central Java Server that executes the program such that the 2 users(one connected to
+* the GertBoard and one connected to the PiFace but the server doesn't know about this) connect to
+* the server, where they each send a 4 bit configuration. 
+* The server checks if the bit configuration are the same. 
+* If they do, a message is sent to both users from the server, and the user's LEDs flash and shut off,
+* if not the server waits for more inputs from the users connected
+*/
 public class RPiServer {
 
 	ClientThread clientThread;
-	ArrayList<Socket> clientSocketList;
-	ArrayList<ClientThread> threads = new ArrayList<ClientThread>();
+	ArrayList<Socket> clientSocketList;//List of all the socket information for each user
+	ArrayList<ClientThread> threads = new ArrayList<ClientThread>();//List of Threads created
 	Socket clientSocket = null;
 	ServerSocket serverSocket = null;
 	volatile String[][] user = new String[2][2];
 	/**
-	 * Gamer 1 Gamer 2 IP Addr gamer(0,0) gamer(0,1) Config gamer(1,0)
-	 * gamer(1,1)
-	 * 
+	 * This represents a table containing the user's data(IP & Bit stream)
+	 * 				 User 1 		User 2 
+	 * IP Addr   	user(0,0)      user(0,1) 
+	 * Bit Config   user(1,0)      user(1,1)
+	 * This class is volatile because it is subject to change from either of the threads at any
+	 * time.
 	 */
-	int numUsers = 0;
-	boolean check = false;
+	int numUsers = 0; //Number of users connected to the server. Maximum is 2
+	boolean check = false;//True if both users enter the same bit stream
 
 	synchronized void assignConfig(String IP, String config){
-
-System.out.println("changing conf of " + IP);
-System.out.println("user 00  " + user[0][0]);
-System.out.println("user 01  " + user[0][1]);
+	//Changes the bit configuration corresponding to the user that sends in its config
+		
+			System.out.println("Changing Configuration of " + IP);
+			System.out.println("user 00  " + user[0][0]);
+			System.out.println("user 01  " + user[0][1]);
 
 			if (IP.equals(user[0][0])){
 				user[1][0] = config;
@@ -35,17 +47,18 @@ System.out.println("user 01  " + user[0][1]);
 	}
 
 	boolean checkMatch() {
+	//Changes that the bit configurations for each user matches
 		if (user[1][0].equals(user[1][1])) {
 			return true;
 		} else {
 			return false;
 		}
-
 	}
 	
 	public void run(){
-int loops = 0;
-boolean gameover = false;
+	//Runs the server
+		int loops = 0;
+		boolean gameover = false;
 		clientSocketList = new ArrayList<Socket>();
         try {
             serverSocket = new ServerSocket(4444);
@@ -56,18 +69,18 @@ boolean gameover = false;
 
 		while(true){
 			try {
-
-if(numUsers<=1){
-				System.out.println("Waiting for client...");
-				clientSocket = serverSocket.accept();
-				clientSocket.setKeepAlive(true);
-				String socketIP = clientSocket.getInetAddress().getHostAddress();
-				clientThread = new ClientThread(clientSocket, this, socketIP);
-threads.add(clientThread);
-System.out.println("New Gamer connected.\n ID: "+ clientThread.getId()+" ; IP: "+ clientSocket.getInetAddress()+"\n");
-				
-				clientThread.start();		
-}
+ 
+				if(numUsers<=1){ //Does not allow more than 2 users to connect to the server
+						System.out.println("Waiting for client...");
+						clientSocket = serverSocket.accept();
+						clientSocket.setKeepAlive(true);
+						String socketIP = clientSocket.getInetAddress().getHostAddress();
+						clientThread = new ClientThread(clientSocket, this, socketIP);
+						threads.add(clientThread);
+						System.out.println("New Gamer connected.\n ID: "+ clientThread.getId()+" ; IP: "+ clientSocket.getInetAddress()+"\n");
+						
+						clientThread.start();		
+				}
 				
 				if(numUsers>=2){
 					System.out.println("Max Users reached.");
@@ -96,7 +109,7 @@ System.out.println("New Gamer connected.\n ID: "+ clientThread.getId()+" ; IP: "
 					System.out.println(checkMatch());
 					for (Socket s : clientSocketList){
 						if(s.isClosed()){
-							System.out.println("cl;osed: " + s.getInetAddress().getHostAddress());
+							System.out.println("closed: " + s.getInetAddress().getHostAddress());
 						}
 						OutputStream outToClient = s.getOutputStream();
 						if(checkMatch()){
@@ -129,6 +142,7 @@ System.out.println("New Gamer connected.\n ID: "+ clientThread.getId()+" ; IP: "
 			s.close();
 		} catch (IOException e) {
 			//coulkd not close socket. oh well.
+			e.printStackTrace();
 		}
 	
 	}
