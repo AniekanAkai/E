@@ -1,0 +1,110 @@
+import socket
+import piface.pfio as pfio
+from time import sleep
+
+
+config = [0] * 4
+index = 0
+status = True
+
+pfio.init()
+
+def right():
+	i = 0
+	while(i < 8):
+		pfio.digital_write(i,1)
+		sleep(0.1)
+		pfio.digital_write(i,0)
+		sleep(0.1)
+		i+=1
+	i = 6
+	while(i >= 0):
+		pfio.digital_write(i,1)
+		sleep(0.1)
+		pfio.digital_write(i,0)
+		sleep(0.1)
+		i-=1
+
+def flash():
+	i = 0
+	while(i < 8):
+		pfio.digital_write(i,1)
+		i+=1
+	sleep(0.5)
+	i = 0
+	while(i < 8):
+		pfio.digital_write(i,0)
+		i+=1
+	sleep(0.5)
+	
+
+def move():
+	global index
+	if index < 3:
+		index+=1
+	else:
+		index = 0
+	sleep(0.5)
+
+def toggle():
+	global config, index 
+	if config[index] == 0:
+		pfio.digital_write(index,1)
+		config[index] = 1
+	else:
+		pfio.digital_write(index,0)
+		config[index] = 0
+	sleep(0.5)
+
+def send():
+	global config
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect(("10.0.0.1", 4444))
+	led_status = "".join(map(str,config))
+	s.send(led_status)
+	respond = s.recv(1024)
+	print respond
+	if respond == "Win!!
+
+
+  ":
+		print "in if statement now"
+		right()
+		exit()
+	else:
+		print "in else"
+  		flash()
+	
+
+def exit():
+	i = 0
+	while(i < 4):
+		if(config[i] == 1):
+			pfio.digital_write(i,0)
+		i+=1
+
+#turn_start()
+#pifacecommon.core.init()
+#port = pifacecommon.core.GPIOA
+#listener = pifacecommon.interrupts.PortEventListener(port)
+
+
+#listener.register(0,pifacecommon.interrupts.IODIR_ON,toggle)
+#listener.register(1,pifacecommon.interrupts.IODIR_ON,move)
+#listener.register(2,pifacecommon.interrupts.IODIR_ON,send)
+
+#listener.activate()
+
+#while(status):
+#	sleep(1)
+
+#listener.deactivate()
+
+
+while(status):
+	if pfio.digital_read(0) == 1:
+		move()
+	elif pfio.digital_read(1) == 1:
+		toggle()
+	elif pfio.digital_read(2) == 1:
+		send()
