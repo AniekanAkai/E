@@ -4,13 +4,15 @@ import java.io.*;
 
 public class ClientThread extends Thread{
 
+	RPiServer server;
     private Socket clientSocket = null;
 	String configuration;
 	
-    ClientThread(Socket socket){
-	super("ClientThread");
-	this.clientSocket =  socket;
-    }
+    ClientThread(Socket socket, RPiServer server){
+		super("ClientThread");
+		this.clientSocket =  socket;
+		this.server = server;
+	}
 
     
     public void run(){
@@ -20,6 +22,7 @@ public class ClientThread extends Thread{
 			  BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
 			  while ((configuration = in.readLine()) != null) {
+				server.assignConfig(configuration);
 				System.out.println(configuration);
 				
 			 }
