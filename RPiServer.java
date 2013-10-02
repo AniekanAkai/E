@@ -29,7 +29,8 @@ public class RPiServer {
 	 */
 	int numUsers = 0; //Number of users connected to the server. Maximum is 2
 	boolean check = false;//True if both users enter the same bit stream
-
+	int countTries = 0 //Number of tries
+	
 	synchronized void assignConfig(String IP, String config){
 	//Changes the bit configuration corresponding to the user that sends in its config
 		
@@ -98,8 +99,7 @@ public class RPiServer {
 				}
 					
 				
-				if(numUsers == 2){
-						
+				if(numUsers == 2){					
 					if(loops >= 2){
 						//This allows the server to listen for more inputs after the first set of input in the case 
 						//of no match. It listens until a match is made. 
@@ -108,6 +108,7 @@ public class RPiServer {
 						}
 					}
 					while(user[1][0] =="2222" || user[1][1] == "3333"){}//Does nothing until both users have changed their bit config
+					countTries++;
 					System.out.println(checkMatch());
 					for (Socket s : clientSocketList){
 						if(s.isClosed()){
@@ -115,6 +116,7 @@ public class RPiServer {
 						}
 						OutputStream outToClient = s.getOutputStream();
 						if(checkMatch()){
+							System.out.println("Number of tries: " + Integer.parseInt(countTries));
 							outToClient.write("win".getBytes());
 							cleanup(s);
 							gameover = true;
@@ -123,7 +125,6 @@ public class RPiServer {
 							user[1][1] = "3333";
 							outToClient.write("fail".getBytes());
 						}
-						
 					}
 				}
 
