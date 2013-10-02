@@ -48,6 +48,7 @@ def cyc_callback(but_cyc): #cycles to next led when cycle button is pressed
 
         if led_curr == led4:
                 led_curr = led1
+
         else:
                 led_curr -= 1
 
@@ -57,30 +58,33 @@ def tog_callback(but_tog): #toggles current led when toggle button is pressed
         GPIO.output(led_curr, not GPIO.input(led_curr))
 
 def snd_callback(but_snd): #sends led status to server
-        global led_curr, led1, led2, led3, led4
+        global led_curr, led1, led2, led3, led4, r
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(("10.0.0.1", 4444))
-        led_status = [GPIO.input(led1), GPIO.input(led2), GPIO.input(led3), GPIO.input(led4)] #update s$
+#       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#       s.connect(("10.0.0.1", 4444))
+        led_status = [GPIO.input(led1), GPIO.input(led2), GPIO.input(led3), GPIO.input(led4)] #update status
         led_str =''.join(map(str,led_status))
-        s.sendall(led_str)
+        r.sendall(led_str)
         print led_status
-        s.close()
 
-def flash(): #blinks end leds 10 times on correct guess
-        for i in range(0,20):
+def flash(): #blinks end leds 3 times on correct guess
+        for i in range(0,6):
                 sleep(0.25)
                 for num in ledflash:
                         GPIO.output(num, not GPIO.input(num))
         for num in ledflash:
-                GPIO.output(num, 1)
+                GPIO.output(num,1)
+        GPIO.cleanup()
+        r.close()
+        sys.exit(1)
+
 
 #detect button presses
 GPIO.add_event_detect(but_tog, GPIO.FALLING, callback=tog_callback, bouncetime=200)
 GPIO.add_event_detect(but_cyc, GPIO.FALLING, callback=cyc_callback, bouncetime=200)
 GPIO.add_event_detect(but_snd, GPIO.FALLING, callback=snd_callback, bouncetime=200)
 
-flash()
+
 try:
         while True:
 
