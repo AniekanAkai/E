@@ -7,11 +7,13 @@ public class ClientThread extends Thread{
 	RPiServer server;
     private Socket clientSocket = null;
 	String configuration;
+	private String myIP;
 	
-    ClientThread(Socket socket, RPiServer server){
+    ClientThread(Socket socket, RPiServer server, String socketIP){
 		super("ClientThread");
 		this.clientSocket =  socket;
 		this.server = server;
+		myIP = socketIP;
 	}
 
     
@@ -22,7 +24,7 @@ public class ClientThread extends Thread{
 			  BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
 			  while ((configuration = in.readLine()) != null) {
-				server.assignConfig("some ip", configuration);
+				server.assignConfig(myIP, configuration);
 				System.out.println(configuration);
 				
 			 }
@@ -35,6 +37,18 @@ public class ClientThread extends Thread{
 		 
 		}
     }
+
+	String getIP(){
+		return clientSocket.getInetAddress().toString();
+	}
+	
+	
+	String getConfig(){
+		return configuration;
+	}
+	
+}
+
 
 	String getIP(){
 		return clientSocket.getInetAddress().toString();
