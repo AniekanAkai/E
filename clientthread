@@ -48,15 +48,3 @@ public class ClientThread extends Thread{
 	}
 	
 }
-
-
-	String getIP(){
-		return clientSocket.getInetAddress().toString();
-	}
-	
-	
-	String getConfig(){
-		return configuration;
-	}
-	
-}
